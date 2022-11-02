@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}主页{% endblock %}
+{% block content %}
+    {% if request.user.is_authenticated %}
+    <h1>你好，{{ request.user.username }}！欢迎回来！</h1>
+    {% endif %}
+<script>
+    
+    function clikeMe() {
+        $.ajax({
+        url: '/ajax_test/',
+        type: "post",
+        data:{"name": $('#first').val(), "age": $('#second').val()},
+        success: function (data) {
+            console.log(data)
+            $("#result").val(data)
+        },
+        error: function (error) {
+            console.log(error)
+        }
+    })
+    }
+    function Music() {
+        $.ajax({
+        url: '/apiTest/',
+        type: "post",
+        data: $("#MyForm").serialize(),
+        success: function (data) {
+            if (data.success == "true") {
+                console.log(typeof data)
+                alert(data.success)
+            } else {
+                console.log(data.error)
+                $.each(data.error, function (name, datas) {
+                    console.log(name)
+                    $("#id_" + name).next().text(datas[0])
+                })
+            }
+        },
+        error: function (error) {
+            console.log(error)
+        }
+    })
+}
+    function Apiclick() {
+        $.ajax({
+        url: '/api/generic/',
+        type: "post",
+        data: $("#Apiform").serialize(),
+        success: function (data) {
+            console.log(data["msg"])
+        },
+        error: function (error) {
+            console.log(error)
+        }
+    })
+}
+    function Apiquery() {
+        $.ajax({
+            url: '/api/generic',
+            type: "get",
+            success: function (data) {
+                console.log(data)
+            },
+            error: function (error) {
+                console.log(error)
+            }
+        })
+    }
+</script>
+<input type="text" id="first"> + <input type="text" id="second"> = <input type="text" id="result">
+<p><button id="btn" onclick="clikeMe()">计算结果</button></p>
+<form id="MyForm">
+    <input type="text" name="singer" id="id_singer">
+    <span style="color: rgb(243, 34, 34);"></span>
+    <input type="text" name="location" id="id_location">
+    <span style="color: rgb(235, 18, 18);"></span>
+</form>
+<button id='but' onclick="Music()">测试</button>
+<div>
+    <form id="Apiform">
+        <input type="text" name="card_id" id="id_card">
+        <input type="text" name="card_user" id="id_card_user">
+    </form>
+    <button id="ist" onclick="Apiclick()">POST</button>
+    <button onclick="Apiquery()">GET</button>
+</div>
+{% endblock %}

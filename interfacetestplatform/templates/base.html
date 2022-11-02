@@ -1,0 +1,51 @@
+<!DOCTYPEY html>
+<html lang="zh-CN">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}base{% endblock %}</title>
+
+    <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    {% block css %} {% endblock %}
+</head>
+<body>
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#my-nav" aria-expanded="false">
+                <span class="sr-only">切换导航条</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">自动化测试平台</a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="my-nav">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="/project/">项目</a></li>
+            </ul>
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="/module/">模块</a> </li>
+                <li class="active"><a href="/test_case/">测试用例</a></li>
+                <li class="active"><a href="/case_suite/">测试集合</a></li>
+            </ul>
+            <ul class="nav navbar-collapse navbar-right">
+                {% if request.user.is_authenticated %}
+                <li><a href="#">当前在线：{{ request.user.username }}</a> </li>
+                <li><a href="/logout">登出</a></li>
+                {% else %}
+                <li><a href="/login">登录</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+{% block content %} {% endblock %}
+
+<script src = '{% static "js/jquery.js" %}'></script>
+<script src = '{% static "bootstrap/js/bootstrap.min.js" %}'></script>
+</body>
+</html>

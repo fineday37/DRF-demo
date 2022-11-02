@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}测试用例详情{% endblock %}
+
+{% block content %}
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th width="3%">id</th>
+            <th width="6%">用例名称</th>
+            <th width="6%">所属项目</th>
+            <th width="10%">请求数据</th>
+            <th width="10%">接口地址</th>
+            <th width="6%">断言内容</th>
+            <th width="10%">编写人员</th>
+            <th width="10%">提取变量表达式</th>
+            <th width="10%">请求类型</th>
+            <th width="4%">状态</th>
+            <th width="6%">创建时间</th>
+            <th width="6%">更新时间</th>
+            <th width="6%">负责人</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>{{test_case.id}}</td>
+            <td>{{test_case.case_name}}</td>
+            <td>{{test_case.belong_project}}</td>
+            <td>{{test_case.belong_module}}</td>
+            <td>{{test_case.request_data}}</td>
+            <td>{{test_case.url}}</td>
+            <td>{{test_case.assert_key}}</td>
+            <td>{{test_case.maintainer}}</td>
+            <td>{{test_case.extract}}</td>
+            <td>{{test_case.request_method}}</td>
+            <td>{{test_case.status}}</td>
+            <td>{{test_case.create_time}}</td>
+            <td>{{test_case.update_time}}</td>
+            <td>{{test_case.user}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<img src="{% static 'images/秋水.jpg' %}" width="1500" height="800" />
+{% endblock %}

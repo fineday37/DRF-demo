@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}登录{% endblock %}
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="col-md-4 col-md-offset-4">
+        <form class="form-login" action="/login/" method="post">
+            {% csrf_token %}
+
+            {% if massage %}
+                 <div class="alert alert-warning">{{ massage }}</div>
+            {% endif %}
+            <h2 class="text-center">欢迎登录</h2>
+            <div class="form-group">
+                <p>账号：</p>
+                {{ login_form.username.laber_tag }}
+                {{ login_form.username }}
+            </div>
+            <div class="form-group">
+                <p>密码：</p>
+                {{ login_form.password.laber_tag }}
+                {{ login_form.password }}
+            </div>
+            <button type="reset" class="btn btn-default pull-left">重置</button>
+            <button type="submit" class="btn btn-primary pull-right">提交</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}管理测试集合{% endblock %}
+{% block content %}
+
+<script type="text/javascript">
+    var arr = new Array()
+    // $(function() {
+    //     var testcases_list = document.getElementsByClassName('testcases_list')
+    //     for (let index = 0; index < testcases_list.length; index++) {
+    //         arr[index] = false
+    //     }
+    // })
+    function checkOrCancelAll() {
+        var all_check = document.getElementById('all_check').checked
+        var testcases_list = document.getElementsByName('testcases_list')
+        console.log(testcases_list)
+        if (all_check) {
+            for (var i = 0; i < testcases_list.length; i++) {
+                testcases_list[i].checked = true
+            }
+            for (var i = 0; i < testcases_list.length; i++) {
+                arr[i] = true
+            }
+            
+        } else {
+            for (var i = 0; i < testcases_list.length; i++) {
+                testcases_list[i].checked = false
+            }
+            for (var i = 0; i < testcases_list.length; i++) {
+                arr[i] = false
+            }
+        }
+    }
+    function ischecked() {
+        var testcases_list = document.getElementsByName("testcases_list")
+        // if (testcases_list.checked) {
+        //     arr[res] = true
+        // } else {
+        //     arr[res] = false
+        // }
+        // var count = 0
+        // for (let index = 0; index < arr.length; index++) {
+        //     if (arr[index]) {
+        //         count ++
+        //         alert("成功添加所选测试用例至测试集合 【 {{ case_suite.suite_desc }} 】")
+        //         return true
+        //     }
+        // }
+        // if (count == arr.length) {
+        //     document.getElementById("all_check").checked = true
+        // } else {
+        //     document.getElementById("all_check").checked = false
+        // }
+        // alert("请选择要添加的测试用例!")
+        // return false
+        var count = 0
+        for (var i = 0; i < testcases_list.length; i++) {
+             if (testcases_list[i].checked == true) {
+                 count ++
+                 alert("成功添加所选测试用例至测试集合【{{case_suite.suite_desc}}】");
+                 console.log(count)
+                 return true
+             }
+         }
+         if (count == testcases_list.length) {
+             document.getElementById("all_check").checked = true
+         } else {
+             document.getElementById("all_check").checked = false
+         }
+         alert("请选择要添加的测试用例！")
+         return false
+    }
+</script>
+<form action="" method="POST">
+    {% csrf_token %}
+    <input type="submit" id='all_check1' value="添加测试用例" onclick="return ischecked()"/>
+    <div class='table-responsive'>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="all_check" onclick="checkOrCancelAll()"/>id</th>
+                    <th>用例名称</th>
+                    <th>所属项目</th>
+                    <th>所属模块</th>
+                    <th>编写人员</th>
+                    <th>创建时间</th>
+                    <th>更新时间</th>
+                    <th>创建用例用户名</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for test_case in test_cases %}
+                <tr>
+                    <td><input type="checkbox" value="{{ test_case.id }}" name="testcases_list"/>{{ test_case.id }}</td>
+                    <td><a herf='{% url "test_case_detail" test_case.id %}'>{{ test_case.case_name }}</a></td>
+                    <td>{{ test_case.belong_project.name }}</td>
+                    <td>{{ test_case.belong_module.name }}</td>
+                    <td>{{ test_case.maintainer }}</td>
+                    <td>{{ test_case.create_time }}</td>
+                    <td>{{ test_case.update_time }}</td>
+                    <td>{{ test_case.user }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</form>
+<div id="pages" class='text-center'>
+    <nav>
+        <ul class="pagination">
+            <li class="step-links">
+                {% if test_cases.has_previous %}
+                <a class="active" href="?page={{ test_cases.previous_page_number }}">上一页</a>
+                {% endif %}
+            </li>
+            <li class="page=item">
+                {% if test_cases.has_previous %}
+                <a class="active" href="?page=1">首页</a>
+                {% endif %}
+            </li>
+            <li class="step-links">
+                <span>
+                    第{{ test_cases.number }}页/共{{test_cases.paginator.num_pages}}页
+                </span>
+            </li>
+            <li class="page-item">
+                {% if test_cases.has_next %}
+                <a class="active" href="?page={{ count.num_pages }}">尾页</a>
+                {% endif %}
+            </li>
+            <li class="steo-links">
+                {% if test_cases.has_next %}
+                <a class="active" href="?page={{ test_cases.next_page_number }}">下一页</a>
+                {% endif %}
+            </li>
+        </ul>
+    </nav>
+{% endblock %}

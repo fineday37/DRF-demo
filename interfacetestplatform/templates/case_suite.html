@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}测试集合{% endblock %}
+
+{% block content %}
+<form action="" method="post">
+    {% csrf_token %}
+    <div class='table-responsive'>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>id</th>
+                <th>测试集合名称</th>
+                <th>创建者</th>
+                <th>创建时间</th>
+                <th>查看/删除测试用例</th>
+                <th>添加测试用例</th>
+                <th>用例集合执行结果</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for case_suite in case_suites %}
+            <tr>
+                <td>{{case_suite.id}}</td>
+                <td>{{case_suite.suite_desc}}</td>
+                <td>{{case_suite.creator}}</td>
+                <td>{{case_suite.create_time}}</td>
+                <td><a href="{% url 'show_and_delete_case_in_suite' case_suite.id %}">查看/删除</a></td>
+                <td><a href="{% url 'add_case_in_suite' case_suite.id %}">添加</a></td>
+                <td><a href="">查看结果</a></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</form>
+
+<div id="pages" class="text-center">
+    <nav>
+        <ul class="pagination">
+            <li class="step-links">
+                {% if case_suites.has_previous %}
+                <a class="active" href="?page={{ case_suits.previous_page_number }}">上一页</a>
+                {% endif %}
+            </li>
+            <li class="step-links">
+                <span class="current">
+                    第{{ case_suites.number }}页 / 共{{ case_suites.paginator.num_pages }}页
+                </span>
+            </li>
+            <li class="step-links">
+                {% if case_suites.has_next %}
+                <a class="active" href="?page={{ case_suits.next_page_number }}">下一页</a>
+                {% endif %}
+            </li>
+        </ul>
+    </nav>
+</div>
+{% endblock %}

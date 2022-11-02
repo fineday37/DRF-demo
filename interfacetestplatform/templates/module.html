@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}模块{% endblock %}
+
+{% block content %}
+<form action="{% url 'module_select' %}" method="GET">
+    {% csrf_token %}
+    <input style="margin-left: 5px;" type="text" name="proj_name" value="{{ proj_name }}" placeholder="输入项目名搜索模块">
+    <input type="submit" value="搜索">
+</form>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>id</th>
+            <th>模块名称</th>
+            <th>项目名称</th>
+            <th>测试负责人</th>
+            <th>项目描述</th>
+            <th>项目创建时间</th>
+            <th>项目更新时间</th>
+            <th><a href="">查看</a> </th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for module in modules %}
+        <tr>
+            <td>{{module.id}}</td>
+            <td><a href="{% url 'module_test_case' module.id %}">{{module.name}}</a></td>
+            <td>{{module.belong_project.name}}</td>
+            <td>{{module.test_owner}}</td>
+            <td>{{module.desc}}</td>
+            <td>{{module.create_time|date:"Y-n-d H:i"}}</td>
+            <td>{{module.update_time|date:"Y-n-d H:i"}}</td>
+            <td><a href="">查看</a> </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div id="pages" class="text-center">
+    <nav>
+        <ul class="pagination">
+            <li class="step-links">
+                {% if modules.has_previous %}
+                <a class="active" href="?proj_name={{ proj_name }}&page={{ modules.previous_page_number }}">上一页</a>
+                {% endif %}
+            </li>
+
+            <li class="page-item">
+                {% if modules.has_previous %}
+                <a class="page-link" href="?proj_name={{ proj_name }}&page=1">首页</a>
+                {% endif %}
+            </li>
+
+            <li class="step-links">
+                <span class="current">
+                    第{{modules.number}}页 / 共{{modules.paginator.num_pages}}页
+                </span>
+            </li>
+
+            <li class="page-item">
+                {% if modules.has_next %}
+                <a class="page-link" href="?proj_name={{ proj_name }}&page={{ count.num_pages }}">尾页</a>
+                {% endif %}
+            </li>
+
+            <li class="step-links">
+                {% if modules.has_next %}
+                <a class="active" href="?proj_name={{ proj_name }}&page={{ modules.next_page_number }}">下一页</a>
+                {% endif %}
+            </li>
+        </ul>
+    </nav>
+</div>
+{% endblock %}
