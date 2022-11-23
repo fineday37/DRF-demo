@@ -24,4 +24,7 @@ urlpatterns = [
     path("api/user/", viewtest.UserView.as_view()),
     path("logins/", obtain_jwt_token),
     path('users/', viewtest.UserViews.as_view()),
+    path('api/file/', viewtest.UpFileAPIView.as_view()),
+    path("download/", views.download, name="download"),
+    path("downloads/", views.download, name = "download")
 ]

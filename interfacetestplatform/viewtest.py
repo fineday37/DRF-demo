@@ -1,3 +1,4 @@
+import os.path
 import re
 
 from django.core.validators import EmailValidator
@@ -14,7 +15,7 @@ from rest_framework.mixins import (
     ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
     DestroyModelMixin, ListModelMixin
 )
-from .models import UserInfo, Role
+from .models import UserInfo, Role, UpFile
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from .MybaseView import creare_token
@@ -22,6 +23,13 @@ from demo.pagination import MyPaginator
 from django.core.cache import cache
 from .Myauthenticate import MyAuthentication
 from django_redis import get_redis_connection
+# 文件解析器
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework import status
+# 下载文件
+from django.http import FileResponse
+from django.http import HttpResponse, Http404
+
 
 class CartAPISerializar(serializers.ModelSerializer):
     class Meta:
@@ -116,7 +124,7 @@ class UserView(APIView):
         page_obj = MyPaginator()
         page_data = page_obj.paginate_queryset(queryset, request)
         ser = UserSerializar(instance=page_data, many=True)
-        return page_obj.get_paginated_response({"code": 200, "data": ser.data})
+        return page_obj.get_paginated_response({"code": 200, "data": ser.data[0]})
 
 
 class CardListAPIVIew(APIView):
@@ -146,6 +154,7 @@ class CardListAPIVIew(APIView):
             })
 
 
+# 新增card
 class GenericAPISerializar(serializers.ModelSerializer):
     class Meta:
         model = Card
@@ -161,6 +170,7 @@ class GenericList(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, Destro
         serializer.save()
 
 
+# 新建用户序列化
 class CreateUserSerializers(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
@@ -174,12 +184,13 @@ class CreateUserSerializers(serializers.Serializer):
         user.save()
         token = creare_token(user)
         conn = get_redis_connection('default')
-        conn.set(user.username, token.encode(), 60)
+        conn.set(user.username, token.encode(), 600)
         # cache.set(user, token)
         user.token = token
         return user
 
 
+# 创建用户获取token
 class UserViews(APIView):
     def post(self, request):
         data = request.data
@@ -202,12 +213,58 @@ class UserViews(APIView):
             return Response({'code': 201, 'msg': '创建失败，请重试'})
 
 
+# 登录token
 def jwt_response_payload_handler(token, user=None, request=None):
     conn = get_redis_connection('default')
-    conn.set(user.username, token, 60)
+    conn.set(user.username, token)
     # cache.set(token, user.username)
     return {
         'userid': user.id,
         'user': user.username,
         'token': token
     }
+
+
+# 上传文件序列化
+class FileSerializer(serializers.ModelSerializer):
+    timestamp = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
+
+    class Meta:
+        model = UpFile
+        fields = ["file", "title", "timestamp"]
+
+
+# 上传文件
+class UpFileAPIView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request):
+        file_serializers = FileSerializer(data=request.data)
+        if file_serializers.is_valid():
+            file_serializers.save()
+            return Response({
+                "code": 0,
+                "msg": "success!",
+                "data": file_serializers.data
+            },
+                status=status.HTTP_200_OK
+            )
+        else:
+            return Response({
+                "code": 400,
+                "msg": "bad request",
+                "data": file_serializers.errors
+            },
+                status=status.HTTP_400_BAD_REQUEST)
+
+
+# 下载文件
+def download(request):
+    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "avatar", "response.txt")
+    try:
+        f = open(file_path, 'rb')
+        r = FileResponse(f, as_attachment=True, filename="response.txt")
+        return r
+    except Exception as e:
+        print("错误")
+        raise e

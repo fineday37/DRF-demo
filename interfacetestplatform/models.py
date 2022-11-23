@@ -119,3 +119,16 @@ class Role(models.Model):
 # 数据校验外键部门
 class Department(models.Model):
     title = models.CharField(verbose_name="名称", max_length=32)
+
+
+# 上传文件
+class UpFile(models.Model):
+    file = models.FileField(verbose_name="文件", upload_to='avatar/', blank=True, null=False)
+    title = models.CharField(verbose_name="标题", max_length=30)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "上传文件"
+
+    def __str__(self):
+        return self.title

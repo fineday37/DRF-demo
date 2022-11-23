@@ -1,13 +1,14 @@
 import json
+import os
 
 from django.shortcuts import render, redirect
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
 from .form import UserForm, MusicTest
 import traceback
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse, Http404
 from django.contrib.auth.models import User
-from .models import Project, Module, TestCase, CaseSuite, SuiteCase
+from .models import Project, Module, TestCase, CaseSuite, SuiteCase, Card
 from django.core.paginator import Paginator, PageNotAnInteger, InvalidPage
 
 
@@ -199,6 +200,7 @@ def add_case_in_suite(request, suite_id):
 # ajax提交数据测试
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.core import serializers
 
 
 @csrf_exempt
@@ -213,7 +215,9 @@ def apiTest(request):
     forms = MusicTest(request.POST)
     print(request.POST)
     if forms.is_valid():
-        datas = {"success": "true"}
+        card_user = serializers.serialize("json", Card.objects.filter(pk=1))
+        card_time = Card.objects.filter(pk=3).first().card_time
+        datas = {"success": "true", "card_user": card_user, "card_time": card_time}
         # data = json.dumps(datas, ensure_ascii=False)
         return JsonResponse(datas, safe=False, json_dumps_params={"ensure_ascii": False})
     else:
@@ -242,3 +246,16 @@ def show_and_delete_case_in_suite(request, suite_id):
     case_suite = CaseSuite.objects.filter(id=suite_id)
     return render(request, "show_and_delete_case_in_suite.html", {"test_cases": get_paginator(request, test_cases),
                                                                   "case_suite": case_suite})
+
+
+@login_required
+def download(request):
+    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "avatar", "response.txt")
+    try:
+        f = open(file_path, 'rb')
+        r = FileResponse(f, as_attachment=True, filename="response.txt")
+        return r
+    except Exception as e:
+        print("错误")
+        raise e
+        # raise Http404("Download error")

@@ -153,7 +153,7 @@ JWT_AUTH = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://43.140.197.232:6379",
+        "LOCATION": "redis://139.9.131.189:6379",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "DECODE_RESPONSES": True
