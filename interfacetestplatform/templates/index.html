@@ -28,7 +28,7 @@
         success: function (data) {
             if (data.success == "true") {
                 console.log(typeof data)
-                alert(data.success)
+                alert(data.card_user)
             } else {
                 console.log(data.error)
                 $.each(data.error, function (name, datas) {
@@ -85,4 +85,5 @@
     <button id="ist" onclick="Apiclick()">POST</button>
     <button onclick="Apiquery()">GET</button>
 </div>
+<a href="{%url 'download' %}">下载1</a>
 {% endblock %}
