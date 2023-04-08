@@ -16,7 +16,7 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+print(BASE_DIR)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -41,7 +41,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'drf_yasg',
-    'rest_framework_jwt'
+    'rest_framework_jwt',
+    'django_filters',
+    'django_apscheduler'
 ]
 
 MIDDLEWARE = [
@@ -153,7 +155,7 @@ JWT_AUTH = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://139.9.131.189:6379",
+        "LOCATION": "redis://47.92.76.123:6379",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "DECODE_RESPONSES": True

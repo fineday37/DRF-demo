@@ -1,0 +1,10 @@
+2022-06-29 10:08:07,677 log.py <module> INFO 合格
+2022-06-29 11:26:48,625 log.py <module> INFO 合格
+2022-06-29 11:29:35,509 log.py <module> INFO 合格
+2022-06-29 11:30:05,896 read_yaml.py write_yam INFO 写入数据成功
+2022-06-29 11:30:43,516 read_yaml.py write_yam INFO 写入数据成功
+2022-06-29 11:31:31,535 read_yaml.py write_yam INFO 写入数据成功
+2022-06-29 11:32:50,991 read_yaml.py write_yam INFO 写入数据成功
+2022-06-29 11:34:12,914 read_yaml.py write_yam INFO 写入数据成功
+2022-06-29 11:35:00,278 read_yaml.py write_yam INFO 写入数据成功
+2022-06-29 11:35:51,605 read_yaml.py write_yam INFO 写入数据成功

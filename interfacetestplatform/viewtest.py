@@ -1,3 +1,4 @@
+import datetime
 import os.path
 import re
 
@@ -17,7 +18,7 @@ from rest_framework.mixins import (
 )
 from .models import UserInfo, Role, UpFile
 from django.contrib.auth.models import User
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 from .MybaseView import creare_token
 from demo.pagination import MyPaginator
 from django.core.cache import cache
@@ -28,6 +29,10 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 # 下载文件
 from django.http import FileResponse
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import BaseFilterBackend
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.filters import SearchFilter
 from django.http import HttpResponse, Http404
 
 
@@ -85,6 +90,12 @@ class UserSerializar(serializers.ModelSerializer):
     def get_extra(self, validated_data):
         return "达摩克里斯之剑"
 
+    def validate(self, attrs):
+        name = attrs.get('username')
+        self.context["please"] = name
+        print(name)
+        return attrs
+
     def create(self, validated_data):
         # print(validated_data)
         depart_id = validated_data.pop('depart')["id"]
@@ -96,11 +107,27 @@ class UserSerializar(serializers.ModelSerializer):
 
     class Meta:
         model = UserInfo
-        fields = ["username", "age", "email", "email4", "level_text", "depart", "roles", "extra"]
+        fields = ["id", "username", "age", "email", "email4", "level_text", "depart", "roles", "extra"]
         extra_kwargs = {
             "username": {"min_length": 1, "max_length": 6},
             "email": {"validators": [EmailValidator, ]}
         }
+
+
+class Filter1(BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        id = request.query_params.get('id')
+        if not id:
+            return queryset
+        return queryset.filter(id=id)
+
+
+class Filter2(BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        card_id = request.query_params.get('card_id')
+        if not card_id:
+            return queryset
+        return queryset.filter(card_id=card_id)
 
 
 class UserView(APIView):
@@ -114,7 +141,8 @@ class UserView(APIView):
             return Response({"code": 400, "data": ser.errors})
         ser.validated_data.pop("email4")
         ls = ser.save(leave=1, password="123")
-        print("打印出来的值是: {}".format(ser))
+        print("打印出来的值是: {}".format(ls))
+        print("设置：{}".format(ser.context["please"]))
         return Response({"code": 200, "data": ser.data})
 
     def get(self, request):
@@ -124,7 +152,7 @@ class UserView(APIView):
         page_obj = MyPaginator()
         page_data = page_obj.paginate_queryset(queryset, request)
         ser = UserSerializar(instance=page_data, many=True)
-        return page_obj.get_paginated_response({"code": 200, "data": ser.data[0]})
+        return page_obj.get_paginated_response({"code": 200, "data": ser.data})
 
 
 class CardListAPIVIew(APIView):
@@ -160,13 +188,79 @@ class GenericAPISerializar(serializers.ModelSerializer):
         model = Card
         fields = '__all__'
 
+    def create(self, validated_data):
+        print("刀片超车啊")
+        user_object = Card.objects.create(**validated_data)
+        # print(user_object)
+        return user_object
 
-class GenericList(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin,
+
+class ModelViewSetPafination(PageNumberPagination):
+    page_size = 2
+    page_query_param = "page"
+    page_size_query_param = "size"
+    max_page_size = 100
+
+
+from django_filters import rest_framework as filters
+from rest_framework import mixins
+from rest_framework.viewsets import ModelViewSet
+
+
+class DigCreateModelMixin(mixins.CreateModelMixin, GenericViewSet):
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        print(serializer)
+        headers = self.get_success_headers(serializer.data)
+        data = {"name": "测试返回", "res": serializer.data}
+        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+
+class DigListModelMixin(mixins.ListModelMixin, GenericViewSet):
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response("指定返回内容")
+
+
+# 过滤搜索条件
+class CollectFilterSet(filters.FilterSet):
+    id_gt = filters.NumberFilter(field_name='id', lookup_expr='gt')
+    user = filters.CharFilter(field_name='card_user', lookup_expr='contains')
+    card_time = filters.CharFilter(field_name='card_time', lookup_expr='year__gt')
+
+    class Meta:
+        model = Card
+        fields = ["card_id", "card_user", "card_time"]
+
+
+class GenericList(DigCreateModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, DigListModelMixin,
                   GenericViewSet):
+    filter_backends = [DjangoFilterBackend, ]
+    filterset_class = CollectFilterSet
+    # filterset_fields = ["card_id"]
+    pagination_class = ModelViewSetPafination
     queryset = Card.objects.all()
     serializer_class = GenericAPISerializar
 
     def perform_create(self, serializer):
+        print(serializer.validated_data['card_id'])
+        print(self.action)
+        serializer.save()
+        # return Response({"active": serializer.validated_data})
+
+    def perform_update(self, serializer):
         serializer.save()
 
 
@@ -205,7 +299,7 @@ class UserViews(APIView):
         try:
             user = CreateUserSerializers(data=data)
             user.is_valid()
-            print(user.errors)
+            # print(user.errors)
             user.save()
             return Response({'code': 200, 'msg': '创建用户成功', 'data': user.data})
         except Exception as e:
@@ -221,8 +315,45 @@ def jwt_response_payload_handler(token, user=None, request=None):
     return {
         'userid': user.id,
         'user': user.username,
-        'token': token
+        'token': token,
+        "code": 20000
     }
+
+
+from rest_framework_jwt.settings import api_settings
+from rest_framework.viewsets import ViewSet
+from rest_framework.decorators import action
+
+jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+
+
+# 自定义登录
+
+class UserAPIView(ViewSet):
+    @action(methods=['POST', ], detail=False)
+    def login(self, request):
+        back_dic = {'code': 20000}
+        username = request.data.get('username')
+        password = request.data.get('password')
+        passwd = User.objects.filter(username=username)[0].password
+        encryption = check_password(password, passwd)
+        print(passwd)
+        if encryption:
+            user = User.objects.filter(username=username).first()
+        else:
+            user = False
+        if user:
+            # 获取荷载  直接用jwt模块提供的，缺什么导什么
+            payload = jwt_payload_handler(user)
+            # 获取token串  直接用jwt模块提供的，缺什么导什么
+            token = jwt_encode_handler(payload)
+            back_dic['token'] = token
+            back_dic['username'] = username
+        else:
+            back_dic['code'] = 101
+            back_dic['message'] = '用户名或密码错误'
+        return Response(back_dic)
 
 
 # 上传文件序列化
@@ -245,7 +376,8 @@ class UpFileAPIView(APIView):
             return Response({
                 "code": 0,
                 "msg": "success!",
-                "data": file_serializers.data
+                "data": file_serializers.data,
+                "setting": UpFile.get_setting(self)
             },
                 status=status.HTTP_200_OK
             )
@@ -259,12 +391,74 @@ class UpFileAPIView(APIView):
 
 
 # 下载文件
-def download(request):
-    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "avatar", "response.txt")
+class DownLoad(APIView):
+    def get(self, request):
+        file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "avatar", request.query_params['name'])
+        try:
+            f = open(file_path, 'rb')
+            r = FileResponse(f, as_attachment=True, filename=request.query_params['name'])
+            return r
+        except Exception as e:
+            print(e)
+            return Response({
+                "error": "找不到该文件"
+            })
+
+
+from apscheduler.schedulers.background import BackgroundScheduler
+from django_apscheduler.jobstores import DjangoJobStore, register_job
+from django_apscheduler.models import DjangoJob
+import smtplib
+from email.mime.text import MIMEText
+import traceback
+from script.snowflake import IdWorker
+
+
+# 发送邮件
+def send_excel(timing):
     try:
-        f = open(file_path, 'rb')
-        r = FileResponse(f, as_attachment=True, filename="response.txt")
-        return r
+        session = smtplib.SMTP_SSL('smtp.qq.com', 465, 30)
+        message = MIMEText(timing, 'plain', 'utf-8')
+        message['subject'] = '响应内容'  # 标题
+        message['from'] = '1250953976@qq.com'  # 发送人
+        message['to'] = 'zhenguo_kong@126.com'  # 接收人
+        session.login('1250953976@qq.com', 'gdvurwhwmxvmgdha')
+        # 发送
+        session.sendmail('1250953976@qq.com', 'zhenguo_kong@126.com', str(message))
+        print('发送成功')
     except Exception as e:
-        print("错误")
-        raise e
+        print(traceback.print_exc(), e)  # 打印错误信息
+
+
+# 定时发送
+class Send_Excel(APIView):
+    def get(self, request):
+        scheduler = BackgroundScheduler(timezone="Asia/Shanghai")
+        scheduler.add_jobstore(DjangoJobStore(), 'default')
+        input_date = str(request.query_params['datetimes']).split("-")
+        text = request.query_params["text"]
+        # task_id = request.query_params['task_id']
+        task_id = IdWorker(1, 2, 0).get_id()
+        print(type(task_id))
+        scheduler.add_job(send_excel, 'date', id=str(task_id), run_date=datetime.datetime
+        (int(input_date[0]), int(input_date[1]), int(input_date[2]),
+         int(input_date[3]), int(input_date[4])), args=(text,))
+        scheduler.start()
+        return Response('定时完成')
+
+
+from rest_framework.exceptions import AuthenticationFailed
+
+
+class Test_Get(APIView):
+    def get(self, requests, pk):
+        # raise AuthenticationFailed("登陆失败")
+        return Response(pk)
+
+
+class Test_Url(ListModelMixin, RetrieveModelMixin, GenericViewSet):
+    @action(methods=['get', 'post', 'put'], detail=False)
+    def latest(self, requests):
+        name = requests.data["name"]
+        data = {"success": name}
+        return Response(data)

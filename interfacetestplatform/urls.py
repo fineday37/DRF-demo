@@ -1,7 +1,12 @@
 from django.urls import path, re_path
 from . import views
-from . import viewtest
+from . import viewtest, pay_view
 from rest_framework_jwt.views import obtain_jwt_token
+from rest_framework import routers
+
+router = routers.DefaultRouter()
+router.register(r'test_url', viewtest.Test_Url, basename='url')
+
 urlpatterns = [
     path('', views.index),
     path('login/', views.login),
@@ -17,14 +22,22 @@ urlpatterns = [
     re_path(r'^add_case_in_suite/([0-9]+)/$', views.add_case_in_suite, name='add_case_in_suite'),
     path(r'ajax_test/', views.ajax_test, name='ajax_test'),
     path(r'apiTest/', views.apiTest, name='apiTest'),
-    re_path(r"^show_and_delete_case_in_suite/([0-9]+)/$", views.show_and_delete_case_in_suite, name=
-            "show_and_delete_case_in_suite"),
+    re_path(r"^show_and_delete_case_in_suite/([0-9]+)/$", views.show_and_delete_case_in_suite,
+            name="show_and_delete_case_in_suite"),
     path("api/book/", viewtest.CardListAPIVIew.as_view()),
     path("api/generic/", viewtest.GenericList.as_view({"get": "list", "post": "create"})),
+    path("api/generic/<int:pk>/", viewtest.GenericList.as_view({"put": "update"})),
     path("api/user/", viewtest.UserView.as_view()),
     path("logins/", obtain_jwt_token),
     path('users/', viewtest.UserViews.as_view()),
     path('api/file/', viewtest.UpFileAPIView.as_view()),
-    path("download/", views.download, name="download"),
-    path("downloads/", views.download, name = "download")
+    path("download/", viewtest.DownLoad.as_view()),
+    path("downloads/", views.download, name="downloads"),
+    path("userlogin/", viewtest.UserAPIView.as_view({"post": "login"})),
+    path('send-excel/', viewtest.Send_Excel.as_view()),
+    path('test_get/<int:pk>/', viewtest.Test_Get.as_view()),
+    path('pay', pay_view.PayView.as_view()),
+    path('image', pay_view.Get_Images.as_view())
 ]
+
+urlpatterns += router.urls

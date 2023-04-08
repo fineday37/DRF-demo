@@ -110,6 +110,9 @@ class UserInfo(models.Model):
     depart = models.ForeignKey(verbose_name="部门", to="Department", on_delete=models.CASCADE, default='')
     roles = models.ManyToManyField(verbose_name="角色", to="Role")
 
+    def __str__(self):
+        return self.username
+
 
 # 数据校验关联角色
 class Role(models.Model):
@@ -121,11 +124,21 @@ class Department(models.Model):
     title = models.CharField(verbose_name="名称", max_length=32)
 
 
+def default_setting():
+    setting = {
+        "name": "返回值"
+    }
+    return setting
+
+
 # 上传文件
 class UpFile(models.Model):
     file = models.FileField(verbose_name="文件", upload_to='avatar/', blank=True, null=False)
     title = models.CharField(verbose_name="标题", max_length=30)
     timestamp = models.DateTimeField(auto_now_add=True)
+
+    def get_setting(self):
+        return default_setting()
 
     class Meta:
         verbose_name = "上传文件"

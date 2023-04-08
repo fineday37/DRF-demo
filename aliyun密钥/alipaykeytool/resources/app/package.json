@@ -1,0 +1,22 @@
+{
+  "name": "alipaykeytool",
+  "version": "2.0.3",
+  "private": true,
+  "description": "alipay key tool",
+  "author": "Alipay",
+  "main": "main.js",
+  "gitHooks": {
+    "pre-commit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{js,jsx,less,md,json}": [
+      "prettier --write"
+    ],
+    "*.ts?(x)": [
+      "prettier --parser=typescript --write"
+    ]
+  },
+  "dependencies": {
+    "electron-devtools-installer": "3.2.0"
+  }
+}

@@ -5,6 +5,12 @@
     <value-preview-text-wrapping value="false" />
     <value-preview-pinned value="false" />
   </component>
+  <component name="DBNavigator.Project.DatabaseBrowserManager">
+    <autoscroll-to-editor value="false" />
+    <autoscroll-from-editor value="true" />
+    <show-object-properties value="true" />
+    <loaded-nodes />
+  </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
     <connection id="a8456db7-9fb7-4299-8225-b22f3ffcad3a">
       <console name="47.92.76.123" type="STANDARD" schema="mysql" session="Main" />
@@ -15,6 +21,21 @@
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
     <open-files />
+  </component>
+  <component name="DBNavigator.Project.DatasetFilterManager">
+    <filter-actions connection-id="a8456db7-9fb7-4299-8225-b22f3ffcad3a" dataset="zhuxian.interfacetestplatform_userinfo" active-filter-id="" />
+    <filter-actions connection-id="a8456db7-9fb7-4299-8225-b22f3ffcad3a" dataset="zhuxian.auth_user" active-filter-id="" />
+    <filter-actions connection-id="a8456db7-9fb7-4299-8225-b22f3ffcad3a" dataset="zhuxian.auth_group_permissions" active-filter-id="" />
+  </component>
+  <component name="DBNavigator.Project.ExecutionManager">
+    <retain-sticky-names value="false" />
+  </component>
+  <component name="DBNavigator.Project.ObjectQuickFilterManager">
+    <last-used-operator value="EQUAL" />
+    <filters />
+  </component>
+  <component name="DBNavigator.Project.ParserDiagnosticsManager">
+    <diagnostics-history />
   </component>
   <component name="DBNavigator.Project.Settings">
     <connections>

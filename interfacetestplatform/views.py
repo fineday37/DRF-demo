@@ -250,10 +250,10 @@ def show_and_delete_case_in_suite(request, suite_id):
 
 @login_required
 def download(request):
-    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "avatar", "response.txt")
+    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "avatar", "log.txt")
     try:
         f = open(file_path, 'rb')
-        r = FileResponse(f, as_attachment=True, filename="response.txt")
+        r = FileResponse(f, as_attachment=True, filename="log.txt")
         return r
     except Exception as e:
         print("错误")

@@ -20,6 +20,7 @@ class MyAuthentication(BaseAuthentication):
             token = tokens[1].encode()
             print(tokens)
             payload = jwt_decode_handler(token)
+            print(payload)
         except jwt.ExpiredSignature:
             raise AuthenticationFailed("token已过期")
         user = User.objects.filter(pk=payload['user_id']).first()
