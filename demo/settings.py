@@ -77,14 +77,24 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'demo.wsgi.application'
-
+DB01 = 'zhuxian'  # 第一个数据库别名
+DB02 = 'testcase'  # 第二个数据库别名
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    'default': {},
+    DB01: {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'zhuxian',
+        'USER': "root",
+        'HOST': "47.92.76.123",
+        'PASSWORD': 'kzg1814666',
+        'POST': 3306
+    },
+    DB02: {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'testcase',
         'USER': "root",
         'HOST': "47.92.76.123",
         'PASSWORD': 'kzg1814666',
